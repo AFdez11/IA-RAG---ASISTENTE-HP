@@ -19,35 +19,66 @@ st.set_page_config(
 # Estilo personalizado para la interfaz corporativa de HP Colombia
 st.markdown("""
 <style>
+    /* Estilos generales */
+    .stApp {
+        background-color: #F8FAFC;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
     .main-header {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         color: #0096D6;
-        font-weight: 700;
-        margin-bottom: 0px;
+        font-weight: 800;
+        font-size: 2.2rem;
+        margin-bottom: 0.2rem;
+        letter-spacing: -0.5px;
     }
     .sub-header {
-        color: #4A5568;
-        font-size: 1.1rem;
+        color: #475569;
+        font-size: 1.05rem;
         margin-bottom: 1.5rem;
     }
-    .chat-container {
-        background-color: #F8FAFC;
-        border-radius: 10px;
-        padding: 1rem;
+    .hp-badge {
+        background-color: #0096D6;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 10px;
     }
+    /* Estilo de la barra lateral */
+    [data-testid="stSidebar"] {
+        background-color: #0F172A;
+        color: #F8FAFC;
+    }
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] span, [data-testid="stSidebar"] p {
+        color: #F8FAFC !important;
+    }
+    /* Estilo de los botones */
     .stButton>button {
         background-color: #0096D6;
         color: white;
-        border-radius: 6px;
+        border-radius: 8px;
         font-weight: 600;
         border: none;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s ease;
     }
     .stButton>button:hover {
         background-color: #0077A8;
         color: white;
+        box-shadow: 0 4px 12px rgba(0, 150, 214, 0.3);
+    }
+    /* Mensajes de chat */
+    .stChatMessage {
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 </style>
-""", unsafe_allow_html=True)
+""",TargetContent: unsafe_allow_html=True)
 
 # Documentos predeterminados de HP Colombia (Textos integrados)
 CATALOGO_HP_TEXT = """[Página 1]
@@ -246,7 +277,8 @@ def query_groq_api(groq_key: str, system_instruction: str, user_prompt: str) -> 
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {groq_key}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
     
     payload = {
@@ -326,24 +358,6 @@ with st.sidebar:
         st.markdown(f"- **{doc['name']}**")
         
     st.caption(f"Total de fragmentos indexados: {len(all_chunks)}")
-    
-    # Subir nuevos PDF
-    uploaded_file = st.file_uploader("Subir nuevo documento PDF", type=["pdf"])
-    if uploaded_file is not None:
-        try:
-            reader = PdfReader(uploaded_file)
-            extracted_text = ""
-            for i, page in enumerate(reader.pages):
-                extracted_text += f"\n[Página {i+1}]\n" + (page.extract_text() or "")
-            
-            new_doc_name = uploaded_file.name
-            # Evitar duplicados
-            if not any(d["name"] == new_doc_name for d in st.session_state["documents"]):
-                st.session_state["documents"].append({"name": new_doc_name, "text": extracted_text})
-                st.success(f"Documento '{new_doc_name}' subido e indexado con éxito.")
-                st.rerun()
-        except Exception as err:
-            st.error(f"Error al leer el archivo PDF: {err}")
             
     st.divider()
     if st.button("🗑️ Limpiar Historial de Chat", use_container_width=True):
@@ -351,20 +365,9 @@ with st.sidebar:
         st.rerun()
 
 # CONTENIDO PRINCIPAL (Main View)
+st.markdown("<div class='hp-badge'>Atención al Cliente Oficial</div>", unsafe_allow_html=True)
 st.markdown("<h1 class='main-header'>Asesora Virtual HP Colombia - Gigi</h1>", unsafe_allow_html=True)
-st.markdown("<p class='sub-header'>Consulte información oficial sobre equipos, precios, garantías, envíos y políticas de devolución.</p>", unsafe_allow_html=True)
-
-# Preguntas de ejemplo rápidas
-st.markdown("**Ejemplos de preguntas rápidas:**")
-col1, col2, col3 = st.columns(3)
-
-preset_question = None
-if col1.button("¿Qué productos están disponibles?"):
-    preset_question = "¿Qué productos están disponibles?"
-if col2.button("¿Cómo funcionan las devoluciones?"):
-    preset_question = "¿Cómo funciona las políticas de devolución?"
-if col3.button("Qué linda estás Gigi"):
-    preset_question = "Qué linda estás Gigi"
+st.markdown("<p class='sub-header'>Consulte información oficial sobre equipos, precios, garantías, envíos y políticas de devolución de HP Colombia.</p>", unsafe_allow_html=True)
 
 st.divider()
 
@@ -374,8 +377,7 @@ for msg in st.session_state["chat_history"]:
         st.markdown(msg["content"])
 
 # Entrada de pregunta del usuario
-prompt_input = st.chat_input("Escribe tu pregunta para Gigi...")
-query = preset_question or prompt_input
+query = st.chat_input("Escribe tu pregunta para Gigi...")
 
 if query:
     # Agregar pregunta al historial

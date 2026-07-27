@@ -1,12 +1,12 @@
 # Asesora Virtual HP Colombia - Gigi (Sistema RAG en Python con Streamlit)
 
-Bienvenido al repositorio oficial del **Sistema de Atención al Cliente y RAG (Retrieval-Augmented Generation) para Hewlett-Packard Colombia**, liderado por la asesora ejecutiva virtual **Gigi**, desarrollada en **Python** con **Streamlit** e integrada con **Google Gemini API** y servidor de respaldo **Groq API**.
+Bienvenido al repositorio oficial del **Sistema de Atención al Cliente y RAG (Retrieval-Augmented Generation) para Hewlett-Packard Colombia**, liderado por la asesora ejecutiva virtual **Gigi**, desarrollada de forma 100% nativa en **Python** con **Streamlit** e integrada con **Google Gemini API** y servidor de respaldo **Groq API**.
 
 ---
 
 ## 1. Visión General del Proyecto
 
-Esta aplicación es una solución de Inteligencia Artificial corporativa diseñada para responder inquietudes de los clientes de **HP Colombia** en tiempo real con alta fidelidad y velocidad. Gigi opera mediante un motor RAG (Retrieval-Augmented Generation) estructurado que indexa y consulta de forma estricta la documentación oficial de la marca:
+Esta aplicación es una solución de Inteligencia Artificial corporativa diseñada para responder inquietudes de los clientes de **HP Colombia** en tiempo real con alta fidelidad y velocidad. Gigi opera mediante un motor RAG (Retrieval-Augmented Generation) estructurado que indexa y consulta de forma estricta la documentación oficial de la marca precargada en el sistema:
 
 1. **`Catalogo_Productos_y_Politicas_HP_Colombia.pdf`**:
    - Catálogo oficial de laptops (Spectre, Envy, Pavilion, OMEN, Victus) e impresoras (Smart Tank 580/670/750 y LaserJet Pro).
@@ -23,12 +23,13 @@ Esta aplicación es una solución de Inteligencia Artificial corporativa diseña
 
 ## 2. Características Destacadas de Gigi
 
-- **Nivel de Concisión y Precisión Ajustado (7/10)**: Diseñado para ofrecer una respuesta óptima que no se limite a una frase ni aburra con textos gigantes. Proporciona datos exactos (modelos, especificaciones, plazos, políticas) con explicaciones breves y estructuradas.
+- **Nivel de Concisión y Precisión Ajustado (7/10)**: Diseñado para ofrecer una respuesta óptima que no se limite a una sola frase ni aburra con textos abrumadores. Proporciona datos exactos (modelos, especificaciones, plazos, políticas) con explicaciones breves y estructuradas.
 - **Cero Emojis & Tono Corporativo**: Garantiza un estilo formal, técnico y comercial acorde con los estándares de HP Colombia.
 - **Sin Saludos Repetitivos**: Responde directamente a cada pregunta sin volver a presentarse o saludar innecesariamente en cada interacción.
-- **Arquitectura de Redundancia y Resiliencia (Dual API)**: Conexión principal con **Google Gemini API** (`gemini-2.5-flash`, `gemini-1.5-flash`) y conmutación automática de respaldo a **Groq API** (`llama-3.3-70b-versatile`) en caso de saturación o falla de quota.
-- **Protección de Credenciales**: Las claves API están protegidas en `.env` e ignoradas en Git mediante `.gitignore` para prevenir filtraciones de seguridad.
-- **Indexación y Carga de Documentos PDF**: Extrae texto de los PDFs con `PyPDF`, realiza fragmentación (*chunking*) con solapamiento por páginas y permite subir nuevos archivos PDF dinámicamente.
+- **Memoria Conversacional**: Mantiene el hilo y contexto de los mensajes anteriores en la sesión actual.
+- **Arquitectura de Redundancia y Resiliencia (Dual API)**: Conexión principal con **Google Gemini API** (`gemini-2.5-flash`, `gemini-1.5-flash`) y conmutación automática de respaldo a **Groq API** (`llama-3.3-70b-versatile`) con cabeceras HTTP optimizadas para prevenir bloqueos 403 Forbidden.
+- **Protección de Credenciales**: Las claves API se gestionan mediante `.env` (o la barra lateral) y están ignoradas en Git a través de `.gitignore` para prevenir cualquier filtración pública de credenciales.
+- **Documentación Oficial Fija e Indexada**: Garantiza que las respuestas provengan única y exclusivamente de las políticas y catálogo oficial verificado de HP Colombia.
 
 ---
 
@@ -37,19 +38,19 @@ Esta aplicación es una solución de Inteligencia Artificial corporativa diseña
 ```
 ┌─────────────────────────────────────────────────────────┐
 │               INTERFAZ STREAMLIT (`app.py`)             │
-│  - Barra lateral: Claves API (Gemini / Groq), PDFs     │
-│  - Carga dinámica de archivos PDF adicionales           │
-│  - Vista principal: Chat, botones rápidos e historial   │
+│  - Estilo visual corporativo oficial de HP Colombia     │
+│  - Barra lateral: Claves API (Gemini / Groq) e Historial│
+│  - Vista principal: Chat conversacional con memoria     │
 └───────────────────────────┬─────────────────────────────┘
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────┐
 │             MOTOR RAG & INDEXADOR EN PYTHON             │
-│  1. Extracción de texto y etiquetado de páginas (PyPDF) │
+│  1. Ingesta y lectura de texto pre-cargado             │
 │  2. Fragmentación inteligente con solapamiento          │
 │  3. Algoritmo de scoring léxico-semántico y TF-IDF      │
 │  4. Recuperación del Top 5 de fragmentos más relevantes │
-│  5. Inyección de contexto y reglas de negocio al Prompt  │
+│  5. Inyección de contexto e historial reciente al Prompt│
 └───────────────────────────┬─────────────────────────────┘
                             │ 
              ┌──────────────┴──────────────┐
@@ -70,17 +71,17 @@ Esta aplicación es una solución de Inteligencia Artificial corporativa diseña
 - **Framework de Interfaz**: Streamlit 1.30+
 - **Procesamiento de Lenguaje / LLM**:
   - Google GenAI SDK (`google-genai` / `google-generativeai`)
-  - Groq API vía HTTPS (`urllib.request`)
-- **Procesamiento de PDF & RAG**: `pypdf` + Algoritmo de similitud de términos con normalización de acentos.
+  - Groq API con conmutación resilliente vía `urllib.request` + User-Agent.
+- **Procesamiento de PDF & RAG**: Extracción de texto y algoritmo de similitud con normalización Unicode de acentos.
 - **Variables de Entorno**: `python-dotenv`
-- **Despliegue**: Streamlit Community Cloud (Hosting gratuito) / Servidor propio.
+- **Despliegue**: Streamlit Community Cloud (Hosting gratuito en 1 clic) / Servidores Cloud.
 
 ---
 
 ## 5. Instalación y Ejecución en Local
 
 ### Paso 1: Requisitos Previos
-Asegúrate de tener **Python 3.9** o superior instalado en tu equipo. Puedes verificarlo con:
+Asegúrate de tener **Python 3.9** o superior instalado en tu equipo:
 ```bash
 python --version
 ```
@@ -101,7 +102,7 @@ GEMINI_API_KEY=tu_clave_gemini_aqui
 # Clave opcional de respaldo (Obtener en Groq Cloud: https://console.groq.com/)
 GROQ_API_KEY=tu_clave_groq_aqui
 ```
-*(También puedes ingresar o modificar las claves API en cualquier momento desde los campos de texto en la barra lateral de Streamlit).*
+*(También puedes ingresar o modificar las claves API en cualquier momento desde los campos de texto en la barra lateral de la interfaz web).*
 
 ### Paso 4: Iniciar la Aplicación Streamlit
 ```bash
@@ -115,7 +116,7 @@ La aplicación se abrirá automáticamente en tu navegador web en **`http://loca
 
 Puedes publicar la aplicación en internet de manera gratuita en menos de 2 minutos siguiendo estos pasos:
 
-1. Subes el código de este repositorio a tu cuenta de **GitHub**.
+1. Sube el código de este repositorio a tu cuenta de **GitHub**.
 2. Dirígete a **[share.streamlit.io](https://share.streamlit.io)** e inicia sesión con tu cuenta de GitHub.
 3. Haz clic en **"New app"**, selecciona tu repositorio de GitHub, la rama `main` y define el archivo de entrada como **`app.py`**.
 4. Haz clic en **"Advanced settings"** -> **"Secrets"** y pega tus credenciales de entorno:
@@ -130,13 +131,11 @@ Puedes publicar la aplicación en internet de manera gratuita en menos de 2 minu
 ## 7. Estructura del Repositorio
 
 ```
-├── app.py                   # Código principal de la app en Python (Streamlit + RAG + Dual API)
-├── requirements.txt         # Lista de librerías de Python requeridas
+├── app.py                   # Código principal de la aplicación en Python (Streamlit + RAG + Dual API)
+├── requirements.txt         # Dependencias de Python necesarias para ejecución y despliegue
 ├── .env.example             # Plantilla de ejemplo para variables de entorno
-├── .gitignore               # Exclusión de credenciales (.env, secrets) y archivos temporales
-├── README.md                # Documentación oficial del proyecto
-├── package.json             # Manifiesto opcional de Node.js
-└── server.ts                # Servidor alternativo en TypeScript/Express
+├── .gitignore               # Exclusión de credenciales (.env, secrets) y temporales en Git
+└── README.md                # Documentación oficial del proyecto
 ```
 
 ---
