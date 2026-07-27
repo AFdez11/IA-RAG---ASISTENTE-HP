@@ -1,0 +1,6 @@
+{
+  "name": "Gigi - Asesora RAG HP Colombia",
+  "description": "Asistente comercial e inteligente RAG impulsada por Gemini para consultar catálogos PDF, políticas de reembolso, envíos, garantías y documentos técnicos",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
