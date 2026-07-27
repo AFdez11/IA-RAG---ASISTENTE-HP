@@ -78,7 +78,7 @@ st.markdown("""
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 </style>
-""",TargetContent: unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # Documentos predeterminados de HP Colombia (Textos integrados)
 CATALOGO_HP_TEXT = """[Página 1]

@@ -475,7 +475,7 @@ REGLAS ESTRICTAS DE RESPUESTA DE GIGI (NIVEL DE CONCISIÓN Y PRECISIÓN 7/10):
     // 2. Proveedor Secundario de Respaldo: Groq API (Llama 3.3 70B Versatile)
     if (!answer) {
       try {
-        const groqApiKey = process.env.GROQ_API_KEY || '--------------aqui-tu-groq-api-key--------------';
+        const groqApiKey = process.env.GROQ_API_KEY;
         const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
           headers: {
