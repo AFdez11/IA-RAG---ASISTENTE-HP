@@ -354,7 +354,7 @@ app.post('/api/rag/ingest', (req: Request, res: Response) => {
 // Endpoint principal RAG: /api/rag/ask
 app.post('/api/rag/ask', async (req: Request, res: Response) => {
   try {
-    const { question, top_k = 5 } = req.body;
+    const { question, top_k = 5, history } = req.body;
 
     if (!question || typeof question !== 'string' || !question.trim()) {
       res.status(400).json({ error: 'La pregunta no puede estar vacía.' });
@@ -362,6 +362,17 @@ app.post('/api/rag/ask', async (req: Request, res: Response) => {
     }
 
     const trimmedQuestion = question.trim();
+
+    // Formatear historial si viene presente
+    let historyContext = '';
+    if (Array.isArray(history) && history.length > 0) {
+      const recentHistory = history.slice(-6);
+      historyContext = recentHistory.map((m: any) => `${m.role === 'user' ? 'Usuario' : 'Gigi'}: ${m.content}`).join('\n');
+    }
+
+    const fullPrompt = historyContext 
+      ? `HISTORIAL DE LA CONVERSACIÓN PREVIA:\n${historyContext}\n\nPREGUNTA ACTUAL DEL USUARIO:\n${trimmedQuestion}`
+      : trimmedQuestion;
 
     // 1. Obtener lista de documentos
     const docNames = documentStore.map(d => d.name).join(', ') || 'Ninguno';
@@ -402,7 +413,7 @@ app.post('/api/rag/ask', async (req: Request, res: Response) => {
       .join('\n\n---\n\n');
 
     const systemInstruction = `Eres Gigi, la asesora ejecutiva de atención al cliente e información corporativa de HP Colombia.
-Tu estilo es estrictamente profesional, corporativo, claro y directo en español.
+Tu estilo es profesional, corporativo, claro y directo en español.
 
 DOCUMENTO OFICIAL CONSULTADO:
 ${docNames}
@@ -412,12 +423,12 @@ FRAGMENTOS RECUPERADOS DEL DOCUMENTO:
 ${contextText}
 --- CONTEXTO FIN ---
 
-REGLAS STRICTAS DE RESPUESTA DE GIGI:
-1. **CERO EMOJIS**: Está PROHIBIDO usar emojis de cualquier tipo en tus respuestas. Mantén un tono técnico y comercial formal.
-2. **SIN SALUDOS REPETITIVOS**: NO saludes ni te vuelvas a presentar en cada respuesta. Solo saluda si el usuario te envía un saludo inicial explícito. En preguntas de consulta o seguimiento, entra DIRECTAMENTE a dar la respuesta exacta.
-3. **RESPUESTAS PRECISAS Y CONCISAS**: Responde únicamente a lo que se pregunta, sin explicaciones redundantes ni relleno.
-4. **CERO ALUCINACIONES**: Basate ÚNICAMENTE en los datos contenidos en el contexto. Si la información solicitada no figura en el documento, responde exactamente con esta frase: "La información solicitada no se encuentra disponible en la documentación oficial de HP Colombia."
-5. **FORMATO LIMPIO Y ESTRUCTURADO**: Usa Markdown profesional con negritas únicamente en nombres de modelos, valores o plazos clave. Usa guiones (-) para listas.`;
+REGLAS ESTRICTAS DE RESPUESTA DE GIGI (NIVEL DE CONCISIÓN Y PRECISIÓN 7/10):
+1. **BALANCE Y PRECISIÓN (7/10)**: Responde de forma puntual, clara y estructurada. Proporciona los datos clave (modelos, especificaciones, precios, plazos o políticas) con una explicación breve y completa, evitando rodeos innecesarios o textos excesivamente extensos.
+2. **CERO EMOJIS**: Está PROHIBIDO usar emojis de cualquier tipo en tus respuestas. Mantén un tono técnico y comercial formal.
+3. **SIN SALUDOS REPETITIVOS**: NO saludes ni te vuelvas a presentar en cada respuesta. Solo saluda si el usuario te envía un saludo inicial explícito. En preguntas de consulta o seguimiento, entra DIRECTAMENTE a dar la respuesta exacta.
+4. **CERO ALUCINACIONES**: Básate ÚNICAMENTE en los datos contenidos en el contexto. Si la información solicitada no figura en el documento, responde exactamente con esta frase: "La información solicitada no se encuentra disponible en la documentación oficial de HP Colombia."
+5. **FORMATO LIMPIO Y ESTRUCTURADO**: Usa Markdown profesional con negritas únicamente en nombres de modelos, valores o plazos clave. Organiza con guiones (-) para listas.`;
 
     const sources = topChunks.map(item => ({
       documentName: item.chunk.documentName,
@@ -444,7 +455,7 @@ REGLAS STRICTAS DE RESPUESTA DE GIGI:
         try {
           const geminiRes = await ai.models.generateContent({
             model: modelName,
-            contents: trimmedQuestion,
+            contents: fullPrompt,
             config: {
               systemInstruction,
               temperature: 0.1
@@ -464,7 +475,7 @@ REGLAS STRICTAS DE RESPUESTA DE GIGI:
     // 2. Proveedor Secundario de Respaldo: Groq API (Llama 3.3 70B Versatile)
     if (!answer) {
       try {
-        const groqApiKey = process.env.GROQ_API_KEY || ' ';
+        const groqApiKey = process.env.GROQ_API_KEY || '--------------API KEY--------------';
         const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -475,7 +486,7 @@ REGLAS STRICTAS DE RESPUESTA DE GIGI:
             model: 'llama-3.3-70b-versatile',
             messages: [
               { role: 'system', content: systemInstruction },
-              { role: 'user', content: trimmedQuestion }
+              { role: 'user', content: fullPrompt }
             ],
             temperature: 0.1,
             max_tokens: 1024,

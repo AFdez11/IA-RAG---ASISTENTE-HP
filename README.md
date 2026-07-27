@@ -1,6 +1,6 @@
 # Asesora Corporativa HP Colombia - Gigi (Sistema RAG Multimodal)
 
-Bienvenido al repositorio oficial del **Sistema de Atención al Cliente y RAG (Retrieval-Augmented Generation) para Hewlett-Packard Colombia**, liderado por la asesora virtual **Gigi**.
+Bienvenido al repositorio oficial del **Sistema de Atención al Cliente y RAG (Retrieval-Augmented Generation) para HP Colombia**, liderado por la asesora virtual **Gigi**.
 
 ---
 
