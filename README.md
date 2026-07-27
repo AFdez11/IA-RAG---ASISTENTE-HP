@@ -4,6 +4,8 @@ Bienvenido al repositorio oficial del **Sistema de Atención al Cliente y RAG (R
 
 ---
 
+**Aplicación Desplegada en Vivo**: [https://ia-rag---asistente-hp-4pcmcaky9nv7aybfnu44pw.streamlit.app/](https://ia-rag---asistente-hp-4pcmcaky9nv7aybfnu44pw.streamlit.app/)
+
 ## 1. Descripción General del Proyecto
 
 Esta aplicación es una solución de inteligencia artificial corporativa diseñada para resolver inquietudes de los clientes de **HP Colombia** en tiempo real. Gigi opera utilizando un motor RAG estructurado que consulta directamente la documentación oficial de la marca:
